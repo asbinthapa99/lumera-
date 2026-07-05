@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lumera Technologies
 
-## Getting Started
+Website and blog CMS for **Lumera Technologies** — a software studio in Kathmandu, Nepal.
 
-First, run the development server:
+Built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, shadcn/ui, MagicUI, Framer Motion (motion) and Prisma + SQLite.
+
+Live domain: `lumera.tech` (set in metadata + sitemap).
+
+---
+
+## What’s inside
+
+**Public site**
+- Landing page: hero, trusted-by strip, services (9 cards with stacked hover images), work, process, testimonials, about, insights, FAQ, office-visit booking, tech-stack, contact
+- `/services/[slug]` — 9 service detail pages (Web, App, AI, AI Automation, Product Design, Cloud & DevOps, Data & Analytics, Cybersecurity, Software Maintenance)
+- `/work/[slug]` — 4 case-study pages
+- `/careers` and `/careers/[slug]` — company values + 5 open roles
+- `/about`, `/contact`, `/insights`, `/insights/[slug]`, `/privacy`, `/terms`, custom `/not-found`
+- `sitemap.xml`, `robots.txt`, dynamic OG image
+
+**Blog CMS**
+- SQLite + Prisma
+- `/admin` — password-protected editor (login → list posts, create, edit with live Markdown preview, delete, publish/unpublish)
+- `/admin/bookings` — see all office-visit bookings
+- Admin session = signed httpOnly cookie, 7-day expiry
+- Public blog reads live from the DB
+
+**Office visit booking**
+- Multi-step Cal.com-style widget on the home page (`#book`)
+- Calendar → time slot → form → confirmation, animated with Framer Motion
+- Backed by `/api/bookings` — Zod-validated, blocks past slots and double-bookings
+
+**Contact form**
+- `/api/contact` — Zod-validated POST endpoint (wire it up to Resend/Slack/etc. when ready)
+
+---
+
+## Getting started
 
 ```bash
+# 1. Install
+npm install
+
+# 2. Configure env
+cp .env.example .env
+# then edit .env → set ADMIN_PASSWORD + SESSION_SECRET
+
+# 3. Set up the database
+npx prisma migrate dev
+npx tsx prisma/seed.ts   # optional — seeds 3 sample blog posts
+
+# 4. Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>. Admin panel is at <http://localhost:3000/admin>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
 
-## Learn More
+| Var | What it does |
+| --- | --- |
+| `DATABASE_URL` | Prisma connection string. Defaults to `file:./dev.db` (SQLite). Swap for a Postgres URL in production. |
+| `ADMIN_PASSWORD` | The password used to sign in at `/admin`. |
+| `SESSION_SECRET` | 32+ char random string used to sign admin session cookies. Generate with `openssl rand -hex 32`. |
 
-To learn more about Next.js, take a look at the following resources:
+Full list in [`.env.example`](.env.example).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+```
+src/
+├── app/
+│   ├── (public pages)     home, about, careers, contact, insights, services, work, privacy, terms
+│   ├── admin/             protected editor (posts, bookings)
+│   └── api/               contact, bookings, posts CRUD, admin auth
+├── components/
+│   ├── (sections)         Hero, Services, Work, Process, Testimonials, About, InsightsStrip, FAQ, BookVisit, TrustedBy, TechStack, Contact, Footer, Nav
+│   ├── admin/             LoginForm, PostEditor, LogoutButton, DeletePostButton
+│   └── ui/                shadcn + MagicUI primitives
+└── lib/
+    ├── db.ts              Prisma client singleton
+    ├── auth.ts            HMAC-signed session cookie helpers
+    ├── services.ts        Services catalog
+    ├── projects.ts        Case studies
+    ├── jobs.ts            Open roles
+    └── utils.ts           cn()
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+prisma/
+├── schema.prisma          Post, Booking models
+└── seed.ts                Seed 3 sample blog posts
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Deploying
+
+The app is built for the **Vercel + Postgres** flow:
+
+1. Change the datasource in `prisma/schema.prisma`:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+2. Delete the SQLite migrations under `prisma/migrations/` and run `npx prisma migrate dev --name init` against a Postgres URL to regenerate them (or use `db push` for a small setup).
+3. In your host (Vercel, Fly, Render, etc.) set:
+   - `DATABASE_URL` — a Postgres URL (Neon and Supabase have generous free tiers)
+   - `ADMIN_PASSWORD` — a strong password
+   - `SESSION_SECRET` — a fresh `openssl rand -hex 32` value
+4. Deploy.
+
+---
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the Next.js dev server (Turbopack) |
+| `npm run build` | Type-check + build for production |
+| `npm start` | Run the production build |
+| `npm run lint` | ESLint |
+| `npx prisma studio` | Local database GUI |
+| `npx tsx prisma/seed.ts` | Seed sample blog posts |
+
+---
+
+## License
+
+© Lumera Technologies Pvt. Ltd. All rights reserved.

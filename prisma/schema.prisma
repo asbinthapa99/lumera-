@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  notes     String   @default("")
+  date      String
+  time      String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  @@index([date])
+}
+
+model Post {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  excerpt      String
+  body         String
+  tag          String   @default("Insights")
+  cover        String   @default("")
+  author       String   @default("Lumera Team")
+  readMinutes  Int      @default(3)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  publishedAt  DateTime @default(now())
+}
