@@ -61,7 +61,6 @@ Open <http://localhost:3000>. Admin panel is at <http://localhost:3000/admin>.
 
 | Var | What it does |
 | --- | --- |
-| `DATABASE_URL` | Prisma connection string. Defaults to `file:./dev.db` (SQLite). Swap for a Postgres URL in production. |
 | `ADMIN_PASSWORD` | The password used to sign in at `/admin`. |
 | `SESSION_SECRET` | 32+ char random string used to sign admin session cookies. Generate with `openssl rand -hex 32`. |
 
