@@ -12,10 +12,12 @@ export const metadata = {
 };
 
 export default async function InsightsPage() {
-  const sorted = await prisma.post.findMany({
-    where: { published: true },
-    orderBy: { publishedAt: "desc" },
-  });
+  const sorted = await prisma.post
+    .findMany({
+      where: { published: true },
+      orderBy: { publishedAt: "desc" },
+    })
+    .catch(() => []);
 
   return (
     <>

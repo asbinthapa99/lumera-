@@ -4,11 +4,13 @@ import { SectionHeader } from "@/components/Services";
 import { prisma } from "@/lib/db";
 
 export async function InsightsStrip() {
-  const featured = await prisma.post.findMany({
-    where: { published: true },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-  });
+  const featured = await prisma.post
+    .findMany({
+      where: { published: true },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+    })
+    .catch(() => []);
 
   if (featured.length === 0) return null;
 

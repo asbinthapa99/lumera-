@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const p = await prisma.post.findUnique({ where: { slug } });
+  const p = await prisma.post.findUnique({ where: { slug } }).catch(() => null);
   if (!p) return { title: "Insights — Lumera Technologies" };
   return { title: `${p.title} — Lumera Technologies`, description: p.excerpt };
 }
@@ -21,14 +21,16 @@ export default async function PostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const p = await prisma.post.findUnique({ where: { slug } });
+  const p = await prisma.post.findUnique({ where: { slug } }).catch(() => null);
   if (!p || !p.published) notFound();
 
-  const more = await prisma.post.findMany({
-    where: { published: true, NOT: { slug: p.slug } },
-    orderBy: { publishedAt: "desc" },
-    take: 2,
-  });
+  const more = await prisma.post
+    .findMany({
+      where: { published: true, NOT: { slug: p.slug } },
+      orderBy: { publishedAt: "desc" },
+      take: 2,
+    })
+    .catch(() => []);
 
   return (
     <>

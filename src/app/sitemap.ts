@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
-  const posts = await prisma.post.findMany({ where: { published: true } });
+  const posts = await prisma.post.findMany({ where: { published: true } }).catch(() => []);
   const postUrls = posts.map((p) => ({
     url: `${SITE}/insights/${p.slug}`,
     lastModified: p.updatedAt.toISOString(),
